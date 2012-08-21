@@ -178,6 +178,10 @@ class GlanceClient(BaseClient):
                 action = "%s?%s" % (action, urllib.urlencode(params))
         headers = headers.copy()
         headers.update(self.auth_headers)
+
+        if not self.management_url.startswith("/v"):
+            self.management_url += "/v1"
+
         (resp, resp_body) = self.request(self.management_url + action, method,
                             body=body, headers=headers, read_body=read_body)
         return resp_body if read_body else resp
