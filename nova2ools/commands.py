@@ -468,7 +468,7 @@ class ImagesCommand(CliCommand):
 
     def __print_image_format(self, format, image):
         id          = image["id"]
-        name        = image["name"]
+        name        = image.get("name", "<no name>")
         created_at  = image["created_at"]
         updated_at  = image["updated_at"]
         status      = image["status"]
