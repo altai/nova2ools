@@ -610,7 +610,7 @@ class VmsCommand(CliCommand):
         "Available variables: `id`, `name`, `created`, `updated`, `user_id`, `status`, `tenant_id`, `tenant_name`, " +
         "`fixed_addresses`, `float_addresses`, `image_id`, `ip_address`. Also admin can use `host` to see VM host. " + 
         "Default format: " +
-        "\"{name:20} {id} {user_id:15} {tenant_name:10} {status:10} {key_name:15}\""
+        "\"{name:20} {id} {user_id:15} {tenant_name:10} {status:10} {key_name:15} {ip_address}\""
     )
     @add_argument("-d", "--details", default=False, action="store_true", help="Print detailed information about VM")
     def list(self):
@@ -673,6 +673,7 @@ class VmsCommand(CliCommand):
         info["tenant_name"] = self.get_tenant_name_by_id(vm["tenant_id"])
         info["image_id"] = vm["image"]["id"]
         info["host"] = vm.get("OS-EXT-SRV-ATTR:host", None)
+        info["ip_address"] = "<no ip>"
         for value in vm["addresses"].itervalues():
             for addr in value:
                 info["ip_address"] = addr["addr"]
