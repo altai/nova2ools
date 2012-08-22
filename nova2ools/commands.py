@@ -654,6 +654,24 @@ class VmsCommand(CliCommand):
         for group in res['result']:
             print group
 
+    @subcommand("Reboot VM")
+    @add_argument("vm", help="VM id or name")
+    @add_argument("--hard", action="store_true", default=False, help="Hard or soft reboot")
+    def reboot(self):
+        srv = self.get_server(self.options.vm)
+        url = "/%s/action" % srv['id']
+        reboot_mode = {"reboot" : {"type": "HARD" if self.options.hard else "SOFT"}}
+        res = self.post(url, reboot_mode)
+
+    @subcommand("Get VNC URI")
+    @add_argument("vm", help="VM id or name")
+    @add_argument("--console-type", default="novnc", help="Console type (novnc or xvpvnc), default: novnc")
+    def console(self):
+        srv = self.get_server(self.options.vm)
+        url = "/%s/action" % srv['id']
+        vnc_mode = {"os-getVNCConsole": {"type": "novnc"}}
+        res = self.post(url, vnc_mode)
+
     def get_image_detail(self, id):
         return self.__get_detail_cached(id, "/images", self.__images)["image"]
 
