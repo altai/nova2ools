@@ -608,7 +608,8 @@ class VmsCommand(CliCommand):
         default="{name:20} {id} {user_id:15} {tenant_name:10} {status:10} {key_name:15} {ip_address}",
         help="Set output format. The format syntax is the same as for Python `str.format` method. " +
         "Available variables: `id`, `name`, `created`, `updated`, `user_id`, `status`, `tenant_id`, `tenant_name`, " +
-        "`fixed_addresses`, `float_addresses`, `image_id`. Default format: " +
+        "`fixed_addresses`, `float_addresses`, `image_id`, `ip_address`. Also admin can use `host` to see VM host. " + 
+        "Default format: " +
         "\"{name:20} {id} {user_id:15} {tenant_name:10} {status:10} {key_name:15}\""
     )
     @add_argument("-d", "--details", default=False, action="store_true", help="Print detailed information about VM")
@@ -671,6 +672,7 @@ class VmsCommand(CliCommand):
                          "tenant_id", "key_name")))
         info["tenant_name"] = self.get_tenant_name_by_id(vm["tenant_id"])
         info["image_id"] = vm["image"]["id"]
+        info["host"] = vm.get("OS-EXT-SRV-ATTR:host", None)
         for value in vm["addresses"].itervalues():
             for addr in value:
                 info["ip_address"] = addr["addr"]
@@ -704,7 +706,7 @@ class VmsCommand(CliCommand):
                     first = False
                 else:
                     prefix = "                 "
-                print "{prefix} {addr[addr]}(v{addr[version]}) net:{net_id} {type}".format(**locals())
+                print "{prefix} {addr[addr]}(v{addr[version]}) net:{net_id}".format(**locals())
         if self.options.show_host:
             print "            Host: ", srv.get("OS-EXT-SRV-ATTR:host")
         if img:
