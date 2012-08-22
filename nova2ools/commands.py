@@ -452,12 +452,12 @@ class ImagesCommand(CliCommand):
         try:
             with open(path) as ifile:
                 image = self.client.add_image(meta, ifile)
-            new = image['id']
-            print "Image registered to %(new)." % locals()
-            return new
         except Exception as exc:
             print "Failed to register %(path)s: %(exc)s" % locals()
-
+        else:
+            new = image['id']
+            print "Image registered to %(new)s." % locals()
+            return new
 
     @staticmethod
     def __filter_images(img):
