@@ -312,6 +312,9 @@ class ImagesCommand(CliCommand):
         help="Results will be ordered by this image attribute")
     @add_argument("--sort-dir", metavar="<asc|desc>", choices=['asc', 'desc'], default="asc",
         help="Direction in which to order results (asc, desc)")
+    @add_argument("--show-kernel", action="store_true", default=False, help="Show kernel images")
+    @add_argument("--show-initrd", action="store_true", default=False, help="Show initrd images")
+    @add_argument("--show-inactive", action="store_true", default=False, help="Show not active images")
     def list(self):
         limit = self.options.limit
         marker = self.options.marker
@@ -468,7 +471,18 @@ class ImagesCommand(CliCommand):
 
     @staticmethod
     def __filter_images(img):
-        return img["status"] == "active"
+        #if not self.options.show_kernel:
+        #    if img["container_format"] == "aki": return False
+        #if not self.options.show_initrd:
+        #    if img["container_format"] == "ari": return False
+        #if not self.options.show_inactive:
+        #    return img["status"] == "active"
+        #return True
+        
+        return (self.options.show_kernel and img["container_format"] == "aki" or
+                self.options.show_initrd and img["container_format"] == "ari") and
+                self.options.show_inactive or img["status"] == "active"
+
 
     def __print_image_format(self, format, image):
         id          = image["id"]
