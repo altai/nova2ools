@@ -182,7 +182,7 @@ class CliCommand(object):
         return self.get_image_by_id(identifier)
 
     def get_image_by_name(self, name):
-        images = self.client.get("/images/detail?name={0}".format(name))["images"]
+        images = self.client.get("/v1/images/detail?name={0}".format(name))["images"]
         filtered_images = [image for image in images if image["name"] == name]
         if len(filtered_images) < 1:
             raise CommandError(1, "Image `{0}` is not found".format(name))
@@ -192,7 +192,7 @@ class CliCommand(object):
         return filtered_images[0]
 
     def get_image_by_id(self, id):
-        image = self.client.get("/images/{0}".format(id))["image"]
+        image = self.client.get("/v1/images/{0}".format(id))["image"]
         return image
 
     def get_security_group_by_name(self, name):
@@ -434,6 +434,12 @@ class ImagesCommand(CliCommand):
 
         return self._register('ari', 'ari', path, owner, name,
             public, architecture)
+
+    @subcommand("Remove registered image")
+    @add_argument('image', help="Image name")
+    def remove(self):
+        image = self.get_image(self.options.image)
+        return self.client.do_request("DELETE", "/images/%s" % image["id"])
 
     def _register(self, container_format, disk_format,
                   path, owner, name=None, public=False,
