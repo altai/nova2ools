@@ -192,7 +192,7 @@ class CliCommand(object):
         return filtered_images[0]
 
     def get_image_by_id(self, id):
-        image = self.client.get("/v1/images/{0}".format(id))["image"]
+        image = self.client.get_image_meta("{0}".format(id))
         return image
 
     def get_security_group_by_name(self, name):
@@ -468,10 +468,7 @@ class ImagesCommand(CliCommand):
 
     @staticmethod
     def __filter_images(img):
-        return (
-            img["name"] is not None
-            and img["status"] == "active"
-            )
+        return img["status"] == "active"
 
     def __print_image_format(self, format, image):
         id          = image["id"]
