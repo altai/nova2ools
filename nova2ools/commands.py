@@ -229,6 +229,7 @@ class CliCommand(object):
 
     def save_list(self, name, collection):
         home = os.environ.get("HOME", "")
+        collection = filter(lambda x: x is not None, collection)
         with open("%s/.nova2ools" % home, "a+") as datafile:
             lines = ["%s='%s'\n" %(name, ' '.join(collection))]
 
