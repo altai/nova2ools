@@ -1382,3 +1382,66 @@ class DNSCommand(CliCommand):
         if resp['error']:
             raise CommandError(1, resp['error'])
         return resp['result']
+
+
+class NetworksCommand(CliCommand):
+    __metaclass__ = CliCommandMetaclass
+
+    RESOURCE = "/gd-networks"
+
+    def __init__(self):
+        super(NetworksCommand, self).__init__("Manage networks")
+
+    @subcommand("List existing networks")
+    @add_argument("-f", "--format", required=False,
+        default="{id} {label} {project_id} {cidr}",
+        help="Set output format. The format syntax is the same as for Python `str.format` method. " +
+        "Available variables: `bridge`, `vpn_public_port`, `dhcp_start`, `bridge_interface`, `updated_at`, `id`, " +
+        "`cidr_v6`, `deleted_at`, `gateway`, `rxtx_base`, `label`, `priority`, `project_id`, `vpn_private_address`, " +
+        "`deleted`, `vlan`, `broadcast`, `netmask`, `injected`, `cidr`, `vpn_public_address`, `multi_host`, `dns2`, " +
+        "`created_at`, `host`, `gateway_v6`, `netmask_v6`, `dns1`. " \
+        "Default format: " +
+        "{id} {label} {project_id} {cidr}"
+    )
+    def list(self):
+        res = self.get('')
+        for network in res['networks']:
+            self.__print_formated(self.options.format, network)
+
+    @subcommand("Add new network")
+    @add_argument("-l", "--label", required=True, help="Network label")
+    @add_argument("-c", "--cidr", required=True, help="CIDR")
+    def create(self):
+        cidr_pair = self.__check_cidr(self.options.cidr)
+        if not cidr_pair:
+            print "Incorrect CIDR"
+            return
+        data = dict((cidr_pair, ))
+        data["label"] = self.options.label
+        res = self.post("", {"network": data})
+
+    @subcommand("Remove existing network")
+    @add_argument("-i", "--id", required=True, help="Network id")
+    def remove(self):
+        res = self.delete("/%s" % self.options.id)
+
+    @subcommand("Associate network with project")
+    @add_argument("-i", "--id", help="network id")
+    def associate(self):
+        res = self.post("/add", {"id": self.options.id})
+
+    @subcommand("Disassociate network with project")
+    @add_argument("-i", "--id", required=True, help="network id")
+    def disassociate(self):
+        res = self.post("/%s/action" % self.options.id, {"disassociate": None})
+
+    def __print_formated(self, format, network):
+        sys.stdout.write(format.format(**network))
+        sys.stdout.write("\n")
+
+    def __check_cidr(self, cidr):
+        if re.match(r"(\d{1,3}\.){3}\d{1,3}/\d+", cidr):
+            return ("cidr", cidr)
+        elif re.match(r"([0-9a-fA-F]{0,4}:){7}[0-9a-fA-F]{0,4}/\d+", cidr):
+            return ("cidr_v6", cidr)
+        return None
