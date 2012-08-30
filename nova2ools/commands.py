@@ -182,7 +182,7 @@ class CliCommand(object):
         return self.get_image_by_id(identifier)
 
     def get_image_by_name(self, name):
-        images = self.client.get("/v1/images/detail?name={0}".format(name))["images"]
+        images = self.client.get_images(filters={"name": name})
         filtered_images = [image for image in images if image["name"] == name]
         if len(filtered_images) < 1:
             raise CommandError(1, "Image `{0}` is not found".format(name))
@@ -316,6 +316,12 @@ class ImagesCommand(CliCommand):
     @add_argument("--show-initrd", action="store_true", default=False, help="Show initrd images")
     @add_argument("--show-inactive", action="store_true", default=False, help="Show not active images")
     def list(self):
+        def __filter_images(img):
+            return (self.options.show_kernel and img["container_format"] == "aki" or
+                    self.options.show_initrd and img["container_format"] == "ari" or
+                    self.options.show_inactive and img["status"] != "active" or
+                    img["status"] == "active")
+
         limit = self.options.limit
         marker = self.options.marker
         sort_key = self.options.sort_key
@@ -328,7 +334,8 @@ class ImagesCommand(CliCommand):
 
         images = self.client.get_images_detailed(**params)
         format = self.options.format
-        for img in ifilter(self.__filter_images, images):
+
+        for img in ifilter(__filter_images, images):
             img = convert_timestamps_to_datetimes(img)
             self.__print_image_format(format, img)
             if self.options.metadata and len(img["properties"]) > 0:
@@ -468,21 +475,6 @@ class ImagesCommand(CliCommand):
             new = image['id']
             print "Image registered to %(new)s." % locals()
             return new
-
-    @staticmethod
-    def __filter_images(img):
-        #if not self.options.show_kernel:
-        #    if img["container_format"] == "aki": return False
-        #if not self.options.show_initrd:
-        #    if img["container_format"] == "ari": return False
-        #if not self.options.show_inactive:
-        #    return img["status"] == "active"
-        #return True
-        
-        return (self.options.show_kernel and img["container_format"] == "aki" or
-                self.options.show_initrd and img["container_format"] == "ari") and
-                self.options.show_inactive or img["status"] == "active"
-
 
     def __print_image_format(self, format, image):
         id          = image["id"]
