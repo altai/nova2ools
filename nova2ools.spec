@@ -9,7 +9,7 @@ Vendor:           Grid Dynamics International, Inc.
 URL:              http://www.griddynamics.com/openstack
 Group:            Development/Languages/Python
 
-Source0:          %{name}-%{version}.tar
+Source0:          %{name}-%{version}.tar.gz
 BuildRoot:        %{_tmppath}/%{name}-%{version}-build
 BuildRequires:    python-setuptools python-argparse
 BuildArch:        noarch
@@ -19,7 +19,7 @@ Requires:         python-argparse
 Set of command line utilities to work with OpenStack.
 
 %prep
-%setup -q -n %{name}-%{version}
+%setup -q
 
 %build
 %{__python} setup.py build
